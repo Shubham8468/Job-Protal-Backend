@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator"
+import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 
@@ -7,8 +8,8 @@ const userSchema= new mongoose.Schema({
     firstName:{
         type:String,
         
-        required:[true,"Please Enter your fist Name."],
-        minlength:[3,"First name must be at least 3 characters"],
+        required:[true,"Please Enter your first Name."],
+        minlength:[3,"Name must be at least 3 characters"],
         maxlength:[30,"Name cannot exceed 30 characters"]
     },
     lastName:{
@@ -80,12 +81,19 @@ const userSchema= new mongoose.Schema({
     })
 }
 
-userSchema.pre("save",async(next)=>{
-    if(!this.isModified("password")){
-        next()
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) {
+        return next();
     }
-    this.password= await bcrypt.hash(this.password,10);
+    this.password = await bcrypt.hash(this.password, 10);
 })
+// here i check user Enter Password is correct or not by compare DB password During Login Time
+// Bt useing bcryt.compare
+userSchema.methods.comparePassword= async function(enteredPassword){
+    return await bcrypt.compare(enteredPassword,this.password);
+}
+
+
 
 export const User= mongoose.model("User",userSchema);
 
