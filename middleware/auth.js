@@ -12,9 +12,10 @@ export const isAuthenticated= catchAsyncErrors( async (req,resp,next)=>{
         return next(new ErrorHandler("Not Authenticated",404));
     }
     // here we access the token for frontend user id 
-    const decode=jwt.verify(token,process.env.JWT_SICRET_KEY)//
+    const decode=jwt.verify(token,process.env.JWT_SICRET_KEY)// yha hm token se id nikal rha hai 
+    // fr user ko id ke help se DB se get kr lenge  
 
-    req.user= await User.findById(decode.id);
+    req.user= await User.findById(decode.id);// new object create in req 
     next();
 
 

@@ -100,16 +100,100 @@ export const userLogin = catchAsyncErrors(async (req, resp, next) => {
 });
 
 // for logout 
-
 export const userLogout = catchAsyncErrors(async (req, resp, next) => {
     // we need to remove cookies 
     resp.status(200).cookie("token", "", {
         expires: new Date(
-            Date.now() ),
+            Date.now()),
         httpOnly: true,
-    }).json({success:true,
-        message:"User Logout Successfully."
+    }).json({
+        success: true,
+        message: "User Logout Successfully."
     })
+})
+
+export const getUser = catchAsyncErrors(async (req, resp, next) => {
+    // here for the get User data 
+    const user = req.user;// ye cookis se aya hai wya DB
+    return resp.status(200).json({
+        message: "User ger Successfully.",
+        success: true,
+        user,
+    })
+})
+
+export const updateUserProfile = catchAsyncErrors(async (req, resp, next) => {
+    const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        firstNiche,
+        secoundNiche,
+        thirdNiche,
+        password,
+        skills,
+        coverLetter,
+        role
+    } = req.body;
+
+    if (role === "job Seeker" && (!firstNiche || !secoundNiche || !thirdNiche)) {
+        return next(new ErrorHandler("Please Provide your Niches!", 400))
+    }
+    const newUserData = {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        firstNiche,
+        secoundNiche,
+        thirdNiche,
+        password,
+        skills,
+        coverLetter,
+        role
+    }
+
+    //for the update Resume and add Resume 
+    if(req.files){
+        const {resume}=req.files;
+        if(resume){
+            const currentResumeId= req.user.resume.public_id;
+            if(currentResumeId){
+                await cloudinary.uploader.destroy(currentResumeId);
+            }
+            const newReume= await cloudinary.uploader.upload(resume.tempFilePath,{
+                folder:`${req.user.firstName}_Resume`
+            });
+            // ab newUserDate vale object me add kr denge
+            newUserData.resume={
+                public_id:newReume.public_id,
+                url:newReume.secure_url
+            }
+        }
+    }
+    // here we update user from DB
+    const userId=req.user._id;
+    const user= await User.findByIdAndUpdate(userId,newUserData,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false
+    })
+    if(user){
+        resp.status(200).json({
+            message:"User Profile Update Successfully",
+            success:true
+        })
+    }
+    
+
+
+
 
 })
+
+
+
 
