@@ -85,7 +85,7 @@ export const userLogin = catchAsyncErrors(async (req, resp, next) => {
         return next(new ErrorHandler("Email, Password and Role are required!", 404));
     }
 
-    const user = await User.findOne({ email }).select("+password");// During feching not fetch password so that i enter select(...)
+    const user = await User.findOne({ email }).select("+password");//During feching not fetch password so that i enter select(...)
     if (!user) {
         return next(new ErrorHandler("Envalid Emial, Please Registerd you Email first", 500))
     }
@@ -132,11 +132,13 @@ export const updateUserProfile = catchAsyncErrors(async (req, resp, next) => {
         firstNiche,
         secoundNiche,
         thirdNiche,
-        password,
         skills,
         coverLetter,
         role
     } = req.body;
+    if (req.body.password) {
+        return next(new ErrorHandler("Not allowed to change password", 404))
+    }
 
     if (role === "job Seeker" && (!firstNiche || !secoundNiche || !thirdNiche)) {
         return next(new ErrorHandler("Please Provide your Niches!", 400))
@@ -150,46 +152,62 @@ export const updateUserProfile = catchAsyncErrors(async (req, resp, next) => {
         firstNiche,
         secoundNiche,
         thirdNiche,
-        password,
+
         skills,
         coverLetter,
         role
     }
 
     //for the update Resume and add Resume 
-    if(req.files){
-        const {resume}=req.files;
-        if(resume){
-            const currentResumeId= req.user.resume.public_id;
-            if(currentResumeId){
+    if (req.files) {
+        const { resume } = req.files;
+        if (resume) {
+            const currentResumeId = req.user.resume.public_id;
+            if (currentResumeId) {
                 await cloudinary.uploader.destroy(currentResumeId);
             }
-            const newReume= await cloudinary.uploader.upload(resume.tempFilePath,{
-                folder:`${req.user.firstName}_Resume`
+            const newReume = await cloudinary.uploader.upload(resume.tempFilePath, {
+                folder: `${req.user.firstName}_Resume`
             });
             // ab newUserDate vale object me add kr denge
-            newUserData.resume={
-                public_id:newReume.public_id,
-                url:newReume.secure_url
+            newUserData.resume = {
+                public_id: newReume.public_id,
+                url: newReume.secure_url
             }
         }
     }
     // here we update user from DB
-    const userId=req.user._id;
-    const user= await User.findByIdAndUpdate(userId,newUserData,{
-        new:true,
-        runValidators:true,
-        useFindAndModify:false
+    const userId = req.user._id;
+    const user = await User.findByIdAndUpdate(userId, newUserData, {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false
     })
-    if(user){
+    if (user) {
         resp.status(200).json({
-            message:"User Profile Update Successfully",
-            success:true
+            message: "User Profile Update Successfully",
+            success: true
         })
     }
-    
+})
 
-
+export const updatePassword = catchAsyncErrors(async (req, resp, next) => {
+    const { newPassword,confirmPassword } = req.body;
+    if (!newPassword || ! confirmPassword) {
+        return next(new ErrorHandler("Please fill both Fields", 404));
+    }
+    if (newPassword !== confirmPassword) {
+        return next(new ErrorHandler("New Password & Confirm Password do not Match!",404))
+    }
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("+password");
+    const isMatchPassword = await user.comparePassword(newPassword);
+    if (isMatchPassword) {
+        return next(new ErrorHandler("Old password is Same!", 404))
+    }
+    user.password=newPassword;
+    await user.save();
+    sendToken(user,200,resp,"password updated successfully.")
 
 
 })
