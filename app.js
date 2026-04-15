@@ -6,6 +6,7 @@ import {connectDB} from "./database/connections.js"
 import ErrorHandler, { errorMiddleare } from "./middleware/error.js";
 import userRouter from "./router/user.router.js";
 import fileUpload from "express-fileupload";
+import jobRouter from "./router/job.router.js";
 config({ path: "./.env" })
 
 const app= express();
@@ -33,6 +34,7 @@ app.use(
 
 connectDB();
 app.use("/api/v1/user",userRouter);
+app.use("/api/v1/job",jobRouter);
 
 app.use(errorMiddleare);///  impotent error middlare call alwage in last  
 
