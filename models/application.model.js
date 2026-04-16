@@ -8,7 +8,7 @@ const applicationSchema = new mongoose.Schema({
             required: true
         },
         name: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: String,
             required: true,
         },
         email: {

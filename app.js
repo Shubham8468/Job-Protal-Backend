@@ -2,6 +2,7 @@ import express from  "express";
 import { config } from 'dotenv'
 import cookieParser from "cookie-parser";
 import cors from "cors"
+import os from "os";
 import {connectDB} from "./database/connections.js"
 import ErrorHandler, { errorMiddleare } from "./middleware/error.js";
 import userRouter from "./router/user.router.js";
@@ -27,7 +28,7 @@ app.use(express.urlencoded({extended:true}))
 app.use(
     fileUpload({
     useTempFiles:true,
-    tempFileDir:"/temp/",
+    tempFileDir: os.tmpdir(),
 }))
 
 

@@ -4,10 +4,10 @@ import { deleteApplication, employerGetAllApllication,jobSeekerGetAllApplication
 
  const applicationRouter= express.Router();
 
- applicationRouter.post("/post/:id",isAuthenticated,isAuthorized("Jok Seeker"),postApplication);
+ applicationRouter.post("/post/:id",isAuthenticated,isAuthorized("job Seeker"),postApplication);
  applicationRouter.get("/employer/getall",isAuthenticated,isAuthorized("Employer"),employerGetAllApllication);
- applicationRouter.get("/jobseeker/getall",isAuthenticated,isAuthorized("Job Seeker"),jobSeekerGetAllApplication);
- applicationRouter.delete("/delete",isAuthenticated,deleteApplication);
+applicationRouter.get("/jobseeker/getall",isAuthenticated,isAuthorized("job Seeker"),jobSeekerGetAllApplication);
+ applicationRouter.delete("/delete/:id",isAuthenticated,deleteApplication);
 
 
  export default applicationRouter;
