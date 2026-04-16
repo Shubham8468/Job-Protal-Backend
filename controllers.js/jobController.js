@@ -65,19 +65,19 @@ export const postjob = catchAsyncErrors(async (req, resp, next) => {
         job
     })
 })
- /// Job post By Me 
-export const postByMe=catchAsyncErrors(async (req,resp,next)=>{
-    const postedBy=req.user._id;
-    const totalJob= await Job.find({
-        postedBy:postedBy
+/// Job post By Me 
+export const postByMe = catchAsyncErrors(async (req, resp, next) => {
+    const postedBy = req.user._id;
+    const totalJob = await Job.find({
+        postedBy: postedBy
     });
-    if(totalJob.length==0){
-        return next(new ErrorHandler("You not posted any Job.",404));
+    if (totalJob.length == 0) {
+        return next(new ErrorHandler("You not posted any Job.", 404));
     }
     return resp.status(200).json({
-        message:"All Job fetched Successfully that are post by you.",
-        success:true,
-        count:totalJob.length,
+        message: "All Job fetched Successfully that are post by you.",
+        success: true,
+        count: totalJob.length,
         totalJob
     })
 })
@@ -85,28 +85,28 @@ export const postByMe=catchAsyncErrors(async (req,resp,next)=>{
 
 // this fuction fatch all posted job from DB
 export const getAllJobs = catchAsyncErrors(async (req, resp, next) => {
-    const {city,niche,searchKeyword}=req.query;
-    const query={};
-    if(city){
-        query.location=city;
+    const { city, niche, searchKeyword } = req.query;
+    const query = {};
+    if (city) {
+        query.location = city;
     }
-    if(niche){
-        query.jobNiche=niche;
+    if (niche) {
+        query.jobNiche = niche;
     }
-    if(searchKeyword){
-        query.$or=[
-            {title:{$regex:searchKeyword,$options:"i"}}, //option:"i" make the search case-insensitive, so "Node", "node", "NODE" all match
-            {companyName:{$regex:searchKeyword,$options:"i"}},
-            {introduction:{$regex:searchKeyword,$options:"i"}}
+    if (searchKeyword) {
+        query.$or = [
+            { title: { $regex: searchKeyword, $options: "i" } }, //option:"i" make the search case-insensitive, so "Node", "node", "NODE" all match
+            { companyName: { $regex: searchKeyword, $options: "i" } },
+            { introduction: { $regex: searchKeyword, $options: "i" } }
         ]
     }
-    const jobs=await Job.find(query);
-    if(jobs.length==0){
-        return next(new ErrorHandler("No Job Avblaible at this mument.", ))
+    const jobs = await Job.find(query);
+    if (jobs.length == 0) {
+        return next(new ErrorHandler("No Job Avblaible at this mument.",))
     }
     return resp.status(200).json({
-        success:true,
-        count:jobs.length,
+        success: true,
+        count: jobs.length,
         jobs
     })
 })
@@ -131,23 +131,35 @@ export const getmyjobs = catchAsyncErrors(async (req, resp, next) => {
 
 //Delete a single Job;
 
-export const deleteJob = catchAsyncErrors(async (req,resp,next)=>{
-    const {id} = req.params;
-    const job=await Job.findById(id);
-    if(!job){
-        return next(new ErrorHandler("Oops! Job Not Fonud.",404));
+export const deleteJob = catchAsyncErrors(async (req, resp, next) => {
+    const { id } = req.params;
+    const job = await Job.findById(id);
+    if (!job) {
+        return next(new ErrorHandler("Oops! Job Not Fonud.", 404));
     }
     await Job.deleteOne(id);
     return resp.status(200).json({
-        message:"Job Delete Successfully.",
-        success:true,
+        message: "Job Delete Successfully.",
+        success: true,
     })
 })
 
 
 // Get a single Job 
 
-export const getASingleJob=catchAsyncErrors(async(req,resp,next)=>{
+export const getASingleJob = catchAsyncErrors(async (req, resp, next) => {
+    const {id}= req.params;
+    const job = await Job.findById(
+        id
+    );
+    if (!job) {
+        return next( new ErrorHandler("Oops! Job Not Found.",404));
+    }
+    return resp.status(200).json({
+        message:"Job Found Successfully.",
+        success:true,
+        job
+    })
 
 })
 
