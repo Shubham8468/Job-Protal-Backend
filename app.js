@@ -9,6 +9,7 @@ import userRouter from "./router/user.router.js";
 import fileUpload from "express-fileupload";
 import jobRouter from "./router/job.router.js";
 import applicationRouter from "./router/application.router.js";
+import { newsLetterCorn } from "./automation/newsLetterCorn.js";
 config({ path: "./.env" })
 
 const app= express();
@@ -37,11 +38,12 @@ app.use(
 connectDB();
 app.use("/api/v1/user",userRouter);
 app.use("/api/v1/job",jobRouter);
-app.use("/api/v1/application",applicationRouter)
+app.use("/api/v1/application",applicationRouter);
+
 
 app.use(errorMiddleare);///  impotent error middlare call alwage in last  
 
-
+newsLetterCorn();
 
 export default app;
 
